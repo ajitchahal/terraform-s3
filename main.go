@@ -11,6 +11,7 @@ import (
 
 var cfg = &m.Config{
 	S3: m.AwsS3{
+		//kiwis-resources-stage-us
 		FileName: "terraform.tfstate",
 	},
 }

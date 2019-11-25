@@ -1,6 +1,8 @@
 package aws
+
 import (
 	"fmt"
+	m "github.com/ajitchahal/terraform-s3/model"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -8,74 +10,61 @@ import (
 	"log"
 	"os"
 )
-func downloadFromBucket() {
+
+func getS3Session(awsS3 m.AwsS3) *session.Session {
 	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
+		Region: aws.String(awsS3.Region)},
 	)
 	ifErrorExit("error connecting to s3", err)
-	bucket := "kiwis-resources-stage-us"
-
-	filename := "README.md"
-	file, err := os.Create(filename)
+	return sess
+}
+func downloadFromBucket(awsS3 m.AwsS3) {
+	file, err := os.Create(awsS3.FileName)
 	if err != nil {
-		exitErrorf("Unable to open file %q, %v", err)
+		exitErrorf("Unable to create file %q, %v", err)
 	}
 
 	defer file.Close()
-	downloader := s3manager.NewDownloader(sess)
+	downloader := s3manager.NewDownloader(getS3Session(awsS3))
 
 	numBytes, err := downloader.Download(file,
 		&s3.GetObjectInput{
-			Bucket: aws.String(bucket),
-			Key:    aws.String(filename),
+			Bucket: aws.String(awsS3.Bucket),
+			Key:    aws.String(awsS3.FileName),
 		})
 	if err != nil {
-		exitErrorf("Unable to download item %q, %v", filename, err)
+		exitErrorf("Unable to download item %q, %v", awsS3.FileName, err)
 	}
 
 	fmt.Println("Downloaded", file.Name(), numBytes, "bytes")
 }
-func uploadToBucket() {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
-	)
-	ifErrorExit("error connecting to s3", err)
-	bucket := "kiwis-resources-stage-us"
-
-	filename := "README.md"
-
-	file, err := os.Open(filename)
+func uploadToBucket(awsS3 m.AwsS3) {
+	file, err := os.Open(awsS3.FileName)
 	if err != nil {
 		exitErrorf("Unable to open file %q, %v", err)
 	}
 
 	defer file.Close()
-	uploader := s3manager.NewUploader(sess)
+	uploader := s3manager.NewUploader(getS3Session(awsS3))
 
 	_, err = uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
-		Key:    aws.String(filename),
+		Bucket: aws.String(awsS3.Bucket),
+		Key:    aws.String(awsS3.FileName),
 		Body:   file,
 	})
 	if err != nil {
 		// Print the error and exit.
-		exitErrorf("Unable to upload %q to %q, %v", filename, bucket, err)
+		exitErrorf("Unable to upload %q to %q, %v", awsS3.FileName, awsS3.Bucket, err)
 	}
 
-	fmt.Printf("Successfully uploaded %q to %q\n", filename, bucket)
+	fmt.Printf("Successfully uploaded %q to %q\n", awsS3.FileName, awsS3.Bucket)
 }
-func listBucketItems() {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
-	)
-	ifErrorExit("error connecting to s3", err)
-	bucket := "kiwis-resources-stage-us"
-
+func listBucketItems(awsS3 m.AwsS3) {
 	// Create S3 service client
-	svc := s3.New(sess)
-	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(bucket)})
+	svc := s3.New(getS3Session(awsS3))
+	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(awsS3.Bucket)})
 	if err != nil {
-		exitErrorf("Unable to list items in bucket %q, %v", bucket, err)
+		exitErrorf("Unable to list items in bucket %q, %v", awsS3.Bucket, err)
 	}
 
 	for _, item := range resp.Contents {
@@ -86,14 +75,9 @@ func listBucketItems() {
 		fmt.Println("")
 	}
 }
-func listBuckets() {
-	sess, err := session.NewSession(&aws.Config{
-		Region: aws.String("us-east-1")},
-	)
-	ifErrorExit("error connecting to s3", err)
-
+func listBuckets(awsS3 m.AwsS3) {
 	// Create S3 service client
-	svc := s3.New(sess)
+	svc := s3.New(getS3Session(awsS3))
 
 	result, err := svc.ListBuckets(nil)
 	if err != nil {
