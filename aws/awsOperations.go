@@ -11,14 +11,14 @@ import (
 	"os"
 )
 
-func getS3Session(awsS3 m.AwsS3) *session.Session {
+func getS3Session(awsS3 *m.AwsS3) *session.Session {
 	sess, err := session.NewSession(&aws.Config{
 		Region: aws.String(awsS3.Region)},
 	)
 	ifErrorExit("error connecting to s3", err)
 	return sess
 }
-func downloadFromBucket(awsS3 m.AwsS3) {
+func DownloadFromBucket(awsS3 *m.AwsS3) {
 	file, err := os.Create(awsS3.FileName)
 	if err != nil {
 		exitErrorf("Unable to create file %q, %v", err)
@@ -38,7 +38,7 @@ func downloadFromBucket(awsS3 m.AwsS3) {
 
 	fmt.Println("Downloaded", file.Name(), numBytes, "bytes")
 }
-func uploadToBucket(awsS3 m.AwsS3) {
+func UploadToBucket(awsS3 *m.AwsS3) {
 	file, err := os.Open(awsS3.FileName)
 	if err != nil {
 		exitErrorf("Unable to open file %q, %v", err)
@@ -59,7 +59,7 @@ func uploadToBucket(awsS3 m.AwsS3) {
 
 	fmt.Printf("Successfully uploaded %q to %q\n", awsS3.FileName, awsS3.Bucket)
 }
-func listBucketItems(awsS3 m.AwsS3) {
+func ListBucketItems(awsS3 *m.AwsS3) {
 	// Create S3 service client
 	svc := s3.New(getS3Session(awsS3))
 	resp, err := svc.ListObjectsV2(&s3.ListObjectsV2Input{Bucket: aws.String(awsS3.Bucket)})
@@ -75,7 +75,7 @@ func listBucketItems(awsS3 m.AwsS3) {
 		fmt.Println("")
 	}
 }
-func listBuckets(awsS3 m.AwsS3) {
+func ListBuckets(awsS3 *m.AwsS3) {
 	// Create S3 service client
 	svc := s3.New(getS3Session(awsS3))
 

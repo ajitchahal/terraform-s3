@@ -1,8 +1,11 @@
 # terraform-s3
 A cli to store and retrieve tfstate to/from S3
 
+# How to use
+go run main.go -s3-op=up -s3-bucket=resources-stage-us -s3-region=us-east-1
+
 ##
-comand line flags
+Command line flags
 
 [blog about cmd flags](https://golangexample.com/generate-flags-by-parsing-structures/)
 
