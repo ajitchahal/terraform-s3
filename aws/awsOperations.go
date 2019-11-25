@@ -4,6 +4,7 @@ import (
 	"fmt"
 	m "github.com/ajitchahal/terraform-s3/model"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
@@ -33,7 +34,17 @@ func DownloadFromBucket(awsS3 *m.AwsS3) {
 			Key:    aws.String(awsS3.FileName),
 		})
 	if err != nil {
-		exitErrorf("Unable to download item %q, %v", awsS3.FileName, err)
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case s3.ErrCodeNoSuchBucket:
+				exitErrorf("bucket %s does not exist", awsS3.Bucket)
+			case s3.ErrCodeNoSuchKey:
+				//just log but do not fail as we do not want it to fail, state file is absent on first attempt
+				log.Printf("object with key %s does not exist in bucket %s", awsS3.FileName, awsS3.Bucket)
+			default:
+				exitErrorf("Unable to download item %q, %v", awsS3.FileName, err)
+			}
+		}
 	}
 
 	fmt.Println("Downloaded", file.Name(), numBytes, "bytes")

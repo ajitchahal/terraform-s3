@@ -2,16 +2,11 @@ package main
 
 import (
 	"flag"
-	"fmt"
-
-	//aws "github.com/ajitchahal/terraform-s3/aws"
+	"github.com/ajitchahal/terraform-s3/aws"
 	m "github.com/ajitchahal/terraform-s3/model"
 	"github.com/ajitchahal/terraform-s3/tf"
-	//"github.com/ajitchahal/terraform-s3/tf"
-
-	"log"
-
 	"github.com/octago/sflags/gen/gflag"
+	"log"
 )
 
 var cfg = &m.Config{
@@ -29,27 +24,25 @@ func parseCmdLineArgs() {
 
 	flag.Parse()
 	log.Println(cfg)
-	fmt.Println("tail:", flag.Args())
+	log.Println("tail:", flag.Args())
 }
+
+//var secretNamesMap = make(map[string]string)
+
+
 
 func main() {
 	parseCmdLineArgs() //go run main.go --help
-
-	
-
-	// switch cfg.S3.Operation {
-	// case "up":
-	// 	aws.UploadToBucket(&cfg.S3)
-	// case "dwn":
-	// 	aws.DownloadFromBucket(&cfg.S3)
-	// case "li":
-	// 	aws.ListBucketItems(&cfg.S3)
-	// case "l":
-	// 	aws.ListBuckets(&cfg.S3)
-	// }
-
-	// //log.Println(string(buff))
-	 tf.ReplacePasswordsWithPlaceHolders()
-
-	// tf.ReplacePlaceHoldersWithPasswords(cfg.S3, "abcf")
+	switch cfg.S3.Operation {
+	case "dwn":
+		aws.DownloadFromBucket(&cfg.S3)
+		tf.ReplacePlaceHoldersWithPasswords()
+	case "up":
+		tf.ReplacePasswordsWithPlaceHolders()
+		aws.UploadToBucket(&cfg.S3)
+	case "li":
+		aws.ListBucketItems(&cfg.S3)
+	case "l":
+		aws.ListBuckets(&cfg.S3)
+	}
 }

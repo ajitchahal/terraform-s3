@@ -9,6 +9,3 @@ type AwsS3 struct {
 type Config struct {
 	S3 AwsS3
 }
-type TfSecrets struct {
-	SecretNames []string `json:"secretnames"`
-}
