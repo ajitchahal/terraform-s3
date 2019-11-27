@@ -28,7 +28,7 @@ func parseEnvVariables() *map[string]string {
 
 //ParseConfig parses secrets-config.json e.g. {"secretnames": ["A","sdsdsds","e","d"]}
 func ParseConfig() TfSecrets {
-	file, err := ioutil.ReadFile("secrets-config.json")
+	file, err := ioutil.ReadFile("tfs3-config.json")
 	if err != nil {
 		log.Fatalf("err: %v", err)
 	}

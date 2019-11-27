@@ -2,7 +2,7 @@
 A cli to store and retrieve tfstate to/from S3
 
 # How to use
-go run main.go -s3-op=up -s3-bucket=resources-stage-us -s3-region=us-east-1
+go run main.go -s3-op=up -s3-bucket=resources-stage-us -s3-region=us-east-1 -s3-filename=terraform.tfstate
 
 ##
 Command line flags
